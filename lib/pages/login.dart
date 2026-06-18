@@ -20,10 +20,16 @@ class _LoginState extends State<Login> {
 
   void handleLogin() {
     setState(() {
+          
+       final  Box box = Hive.box("loginBox");
+        box.put("loginBox", true);
+        box.put("tax", tax.text);
+        box.put("userName", userName.text);
+        box.put("passWord", passWord.text);
       taxError = null;
       nameError = null;
       passWordError = null;
-      if (tax.text != " 11111") {
+      if (tax.text != "11111") {
         taxError = "can du 5 so ";
       }
       if (userName.text != "demo") {
@@ -53,22 +59,21 @@ class _LoginState extends State<Login> {
           },
         );
       }
-      //     Hive.openBox("loginBox");
-      //  final  Box box = Hive.box("loginBox");
-      //   box.put("loginBox", '');
-      //   box.put("userName", '');
-      //   box.put("userName", '');
-      //   box.put("passWord", '');
+    
     });
   }
-
+  @override
+  void initState() {
+    // TODO: implement initState
+     final box = Hive.box("loginBox");
+    tax.text = box.get("tax", defaultValue: '');
+    userName.text = box.get("userName", defaultValue: '');
+    passWord.text = box.get("passWord", defaultValue: '');
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
-    // final box = Hive.box("loginBox");
-    // box.get("loginBox", defaultValue: true);
-    // box.get("userName", defaultValue: '');
-    // box.get("userName", defaultValue: '');
-    // box.get("passWord", defaultValue: '');
+   
     return Scaffold(
       body: Container(
         margin: EdgeInsets.symmetric(horizontal: 20),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:hive/hive.dart';
 import 'package:practice_login_product_sds/pages/home.dart';
 import 'package:practice_login_product_sds/pages/login.dart';
 
@@ -13,6 +14,9 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
+      // Hive.openBox("loginBox");
+      // final box = Hive.box("loginBox");
+
     return MaterialApp(home:Login(),) ;
   }
 }

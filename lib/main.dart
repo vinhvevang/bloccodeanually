@@ -5,15 +5,14 @@ import 'package:hive_flutter/adapters.dart';
 import 'package:practice_login_product_sds/bloc/crud_product_bloc.dart';
 import 'package:practice_login_product_sds/my_app.dart';
 
-void main(){
+void main() async{
       WidgetsFlutterBinding.ensureInitialized();
-      // Hive.initFlutter();
+     await Hive.initFlutter();
 
-      // Hive.openBox("loginBox");
-
-      // final box = Hive.box("loginBox");
-      // box.get("loginBox",defaultValue: false);
-      runApp(BlocProvider(
+   await   Hive.openBox("loginBox");
+      
+    
+      runApp( BlocProvider(
         create: (_)=> CrudProductBloc(),
         child: MyApp(),),
         
