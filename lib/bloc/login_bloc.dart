@@ -3,6 +3,37 @@ import 'package:hive/hive.dart';
 
 const _unset = Object();
 
+abstract class LoginEvent {
+  const LoginEvent();
+}
+
+class LoginTaxChanged extends LoginEvent {
+  const LoginTaxChanged(this.value);
+  final String value;
+}
+
+class LoginUserNameChanged extends LoginEvent {
+  const LoginUserNameChanged(this.value);
+  final String value;
+}
+
+class LoginPassWordChanged extends LoginEvent {
+  const LoginPassWordChanged(this.value);
+  final String value;
+}
+
+class LoginSubmitRequested extends LoginEvent {
+  const LoginSubmitRequested();
+}
+
+class LoginSubmitErrorCleared extends LoginEvent {
+  const LoginSubmitErrorCleared();
+}
+
+class LoginLogoutRequested extends LoginEvent {
+  const LoginLogoutRequested();
+}
+
 class LoginState {
   final String tax;
   final String userName;
@@ -49,9 +80,8 @@ class LoginState {
       passWord: passWord ?? this.passWord,
       taxError: identical(taxError, _unset) ? this.taxError : taxError as String?,
       nameError: identical(nameError, _unset) ? this.nameError : nameError as String?,
-      passWordError: identical(passWordError, _unset)
-          ? this.passWordError
-          : passWordError as String?,
+      passWordError:
+          identical(passWordError, _unset) ? this.passWordError : passWordError as String?,
       submitError:
           identical(submitError, _unset) ? this.submitError : submitError as String?,
       isAuthenticated: isAuthenticated ?? this.isAuthenticated,
@@ -59,48 +89,54 @@ class LoginState {
   }
 }
 
-class LoginCubit extends Cubit<LoginState> {
-  LoginCubit(this._box) : super(LoginState.fromBox(_box));
+class LoginBloc extends Bloc<LoginEvent, LoginState> {
+  LoginBloc(this._box) : super(LoginState.fromBox(_box)) {
+    on<LoginTaxChanged>((event, emit) {
+      emit(
+        state.copyWith(
+          tax: event.value,
+          taxError: null,
+          submitError: null,
+        ),
+      );
+    });
+
+    on<LoginUserNameChanged>((event, emit) {
+      emit(
+        state.copyWith(
+          userName: event.value,
+          nameError: null,
+          submitError: null,
+        ),
+      );
+    });
+
+    on<LoginPassWordChanged>((event, emit) {
+      emit(
+        state.copyWith(
+          passWord: event.value,
+          passWordError: null,
+          submitError: null,
+        ),
+      );
+    });
+
+    on<LoginSubmitErrorCleared>((event, emit) {
+      if (state.submitError != null) {
+        emit(state.copyWith(submitError: null));
+      }
+    });
+
+    on<LoginSubmitRequested>(_onSubmitRequested);
+    on<LoginLogoutRequested>(_onLogoutRequested);
+  }
 
   final Box _box;
 
-  void taxChanged(String value) {
-    emit(
-      state.copyWith(
-        tax: value,
-        taxError: null,
-        submitError: null,
-      ),
-    );
-  }
-
-  void userNameChanged(String value) {
-    emit(
-      state.copyWith(
-        userName: value,
-        nameError: null,
-        submitError: null,
-      ),
-    );
-  }
-
-  void passWordChanged(String value) {
-    emit(
-      state.copyWith(
-        passWord: value,
-        passWordError: null,
-        submitError: null,
-      ),
-    );
-  }
-
-  void clearSubmitError() {
-    if (state.submitError != null) {
-      emit(state.copyWith(submitError: null));
-    }
-  }
-
-  Future<void> submit() async {
+  Future<void> _onSubmitRequested(
+    LoginSubmitRequested event,
+    Emitter<LoginState> emit,
+  ) async {
     String? taxError;
     String? nameError;
     String? passWordError;
@@ -108,11 +144,9 @@ class LoginCubit extends Cubit<LoginState> {
     if (state.tax.trim() != '11111') {
       taxError = 'can du 5 so ';
     }
-
     if (state.userName.trim() != 'demo') {
       nameError = 'khong duoc trong';
     }
-
     if (state.passWord.trim() != '123456') {
       passWordError = ' 6< password < 50';
     }
@@ -148,8 +182,12 @@ class LoginCubit extends Cubit<LoginState> {
     );
   }
 
-  Future<void> logout() async {
+  Future<void> _onLogoutRequested(
+    LoginLogoutRequested event,
+    Emitter<LoginState> emit,
+  ) async {
     await _box.put('loginBox', false);
+
     emit(
       state.copyWith(
         submitError: null,

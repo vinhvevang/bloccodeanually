@@ -1,36 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:practice_login_product_sds/bloc/login_cubit.dart';
+import 'package:practice_login_product_sds/bloc/login_bloc.dart';
 
 class Login extends StatelessWidget {
   const Login({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<LoginCubit, LoginState>(
-      listenWhen: (previous, current) =>
-          previous.submitError != current.submitError &&
-          current.submitError != null,
+    return BlocConsumer<LoginBloc, LoginState>(
       listener: (context, state) async {
-        await showDialog<void>(
-          context: context,
-          builder: (dialogContext) {
-            return AlertDialog(
-              title: const Text('thong bao'),
-              content: const Text('Thong tin khong hop le'),
-              actions: [
-                IconButton(
-                  onPressed: () => Navigator.pop(dialogContext),
-                  icon: const Icon(Icons.close),
-                ),
-              ],
-            );
-          },
-        );
-        context.read<LoginCubit>().clearSubmitError();
+        if (state.submitError != null) {
+          await showDialog<void>(
+            context: context,
+            builder: (dialogContext) {
+              return AlertDialog(
+                title: const Text('thong bao'),
+                content: const Text('Thong tin khong hop le'),
+                actions: [
+                  IconButton(
+                    onPressed: () => Navigator.pop(dialogContext),
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
+              );
+            },
+          );
+
+          context.read<LoginBloc>().add(const LoginSubmitErrorCleared());
+        }
       },
+
       builder: (context, state) {
-        final loginCubit = context.read<LoginCubit>();
+        final loginBloc = context.read<LoginBloc>();
 
         return Scaffold(
           body: Container(
@@ -38,28 +39,25 @@ class Login extends StatelessWidget {
             child: Column(
               children: [
                 const SizedBox(height: 50),
+
+                /// TAX
                 const Text(
                   'Ma so thue',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 TextFormField(
                   initialValue: state.tax,
-                  onChanged: loginCubit.taxChanged,
+                  onChanged: (value) =>
+                      loginBloc.add(LoginTaxChanged(value)),
                   decoration: InputDecoration(
                     label: const Text('ma so thue'),
                     floatingLabelBehavior: FloatingLabelBehavior.never,
                     enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey.shade400, width: 2),
+                      borderSide:
+                          BorderSide(color: Colors.grey.shade400, width: 2),
                       borderRadius: BorderRadius.circular(3),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                        color: Colors.deepOrangeAccent,
-                        width: 1,
-                      ),
-                      borderRadius: BorderRadius.circular(3),
-                    ),
-                    errorBorder: OutlineInputBorder(
                       borderSide: const BorderSide(
                         color: Colors.deepOrangeAccent,
                         width: 1,
@@ -76,29 +74,27 @@ class Login extends StatelessWidget {
                       style: const TextStyle(color: Colors.red),
                     ),
                   ),
+
                 const SizedBox(height: 30),
+
+                /// USERNAME
                 const Text(
                   'Tai khoan',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 TextFormField(
                   initialValue: state.userName,
-                  onChanged: loginCubit.userNameChanged,
+                  onChanged: (value) =>
+                      loginBloc.add(LoginUserNameChanged(value)),
                   decoration: InputDecoration(
                     label: const Text('tai khoan'),
                     floatingLabelBehavior: FloatingLabelBehavior.never,
                     enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey.shade400, width: 2),
+                      borderSide:
+                          BorderSide(color: Colors.grey.shade400, width: 2),
                       borderRadius: BorderRadius.circular(3),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                        color: Colors.deepOrangeAccent,
-                        width: 1,
-                      ),
-                      borderRadius: BorderRadius.circular(3),
-                    ),
-                    errorBorder: OutlineInputBorder(
                       borderSide: const BorderSide(
                         color: Colors.deepOrangeAccent,
                         width: 1,
@@ -115,29 +111,27 @@ class Login extends StatelessWidget {
                       style: const TextStyle(color: Colors.red),
                     ),
                   ),
+
                 const SizedBox(height: 30),
+
+                /// PASSWORD
                 const Text(
                   'Mat khau',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 TextFormField(
                   initialValue: state.passWord,
-                  onChanged: loginCubit.passWordChanged,
+                  onChanged: (value) =>
+                      loginBloc.add(LoginPassWordChanged(value)),
                   decoration: InputDecoration(
                     label: const Text('mat khau'),
                     floatingLabelBehavior: FloatingLabelBehavior.never,
                     enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey.shade400, width: 2),
+                      borderSide:
+                          BorderSide(color: Colors.grey.shade400, width: 2),
                       borderRadius: BorderRadius.circular(3),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderSide: const BorderSide(
-                        color: Colors.deepOrangeAccent,
-                        width: 1,
-                      ),
-                      borderRadius: BorderRadius.circular(3),
-                    ),
-                    errorBorder: OutlineInputBorder(
                       borderSide: const BorderSide(
                         color: Colors.deepOrangeAccent,
                         width: 1,
@@ -154,7 +148,10 @@ class Login extends StatelessWidget {
                       style: const TextStyle(color: Colors.red),
                     ),
                   ),
+
                 const SizedBox(height: 30),
+
+                /// BUTTON
                 SizedBox(
                   width: double.infinity,
                   height: 81,
@@ -162,7 +159,8 @@ class Login extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.deepOrangeAccent,
                     ),
-                    onPressed: loginCubit.submit,
+                    onPressed: () =>
+                        loginBloc.add(const LoginSubmitRequested()),
                     child: const Text(
                       'Dang nhap',
                       style: TextStyle(color: Colors.white),
