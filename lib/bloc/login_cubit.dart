@@ -1,0 +1,163 @@
+import 'package:bloc/bloc.dart';
+import 'package:hive/hive.dart';
+
+const _unset = Object();
+
+class LoginState {
+  final String tax;
+  final String userName;
+  final String passWord;
+  final String? taxError;
+  final String? nameError;
+  final String? passWordError;
+  final String? submitError;
+  final bool isAuthenticated;
+
+  const LoginState({
+    required this.tax,
+    required this.userName,
+    required this.passWord,
+    this.taxError,
+    this.nameError,
+    this.passWordError,
+    this.submitError,
+    this.isAuthenticated = false,
+  });
+
+  factory LoginState.fromBox(Box box) {
+    return LoginState(
+      tax: (box.get('tax', defaultValue: '') ?? '') as String,
+      userName: (box.get('userName', defaultValue: '') ?? '') as String,
+      passWord: (box.get('passWord', defaultValue: '') ?? '') as String,
+      isAuthenticated: (box.get('loginBox', defaultValue: false) ?? false) as bool,
+    );
+  }
+
+  LoginState copyWith({
+    String? tax,
+    String? userName,
+    String? passWord,
+    Object? taxError = _unset,
+    Object? nameError = _unset,
+    Object? passWordError = _unset,
+    Object? submitError = _unset,
+    bool? isAuthenticated,
+  }) {
+    return LoginState(
+      tax: tax ?? this.tax,
+      userName: userName ?? this.userName,
+      passWord: passWord ?? this.passWord,
+      taxError: identical(taxError, _unset) ? this.taxError : taxError as String?,
+      nameError: identical(nameError, _unset) ? this.nameError : nameError as String?,
+      passWordError: identical(passWordError, _unset)
+          ? this.passWordError
+          : passWordError as String?,
+      submitError:
+          identical(submitError, _unset) ? this.submitError : submitError as String?,
+      isAuthenticated: isAuthenticated ?? this.isAuthenticated,
+    );
+  }
+}
+
+class LoginCubit extends Cubit<LoginState> {
+  LoginCubit(this._box) : super(LoginState.fromBox(_box));
+
+  final Box _box;
+
+  void taxChanged(String value) {
+    emit(
+      state.copyWith(
+        tax: value,
+        taxError: null,
+        submitError: null,
+      ),
+    );
+  }
+
+  void userNameChanged(String value) {
+    emit(
+      state.copyWith(
+        userName: value,
+        nameError: null,
+        submitError: null,
+      ),
+    );
+  }
+
+  void passWordChanged(String value) {
+    emit(
+      state.copyWith(
+        passWord: value,
+        passWordError: null,
+        submitError: null,
+      ),
+    );
+  }
+
+  void clearSubmitError() {
+    if (state.submitError != null) {
+      emit(state.copyWith(submitError: null));
+    }
+  }
+
+  Future<void> submit() async {
+    String? taxError;
+    String? nameError;
+    String? passWordError;
+
+    if (state.tax.trim() != '11111') {
+      taxError = 'can du 5 so ';
+    }
+
+    if (state.userName.trim() != 'demo') {
+      nameError = 'khong duoc trong';
+    }
+
+    if (state.passWord.trim() != '123456') {
+      passWordError = ' 6< password < 50';
+    }
+
+    final isValid = taxError == null && nameError == null && passWordError == null;
+
+    if (isValid) {
+      await _box.put('loginBox', true);
+      await _box.put('tax', state.tax);
+      await _box.put('userName', state.userName);
+      await _box.put('passWord', state.passWord);
+
+      emit(
+        state.copyWith(
+          taxError: null,
+          nameError: null,
+          passWordError: null,
+          submitError: null,
+          isAuthenticated: true,
+        ),
+      );
+      return;
+    }
+
+    emit(
+      state.copyWith(
+        taxError: taxError,
+        nameError: nameError,
+        passWordError: passWordError,
+        submitError: 'Thong tin khong hop le',
+        isAuthenticated: false,
+      ),
+    );
+  }
+
+  Future<void> logout() async {
+    await _box.put('loginBox', false);
+    emit(
+      state.copyWith(
+        submitError: null,
+        taxError: null,
+        nameError: null,
+        passWordError: null,
+        isAuthenticated: false,
+      ),
+    );
+  }
+}
