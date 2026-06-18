@@ -144,11 +144,17 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     if (state.tax.trim() != '11111') {
       taxError = 'can du 5 so ';
     }
-    if (state.userName.trim() != 'demo') {
+    if (state.userName.isEmpty) {
       nameError = 'khong duoc trong';
     }
-    if (state.passWord.trim() != '123456') {
+     if (state.userName != "demo") {
+      nameError = 'sai ten tai khoan';
+    }
+    if (state.passWord.length < 6 || state.passWord.length > 50) {
       passWordError = ' 6< password < 50';
+    }
+     if (state.passWord != "123456") {
+      passWordError = 'sai mat khau';
     }
 
     final isValid = taxError == null && nameError == null && passWordError == null;
