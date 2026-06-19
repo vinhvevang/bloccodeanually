@@ -176,6 +176,22 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
       );
       return;
     }
+    else{
+       await _box.put('loginBoxx', true);
+      await _box.put('tax', state.tax);
+      await _box.put('userName', state.userName);
+      await _box.put('passWord', state.passWord);
+
+      emit(
+        state.copyWith(
+          taxError: null,
+          nameError: null,
+          passWordError: null,
+          submitError: null,
+          isAuthenticated: false,
+        ),
+      );
+    }
 
     emit(
       state.copyWith(
